@@ -7,19 +7,35 @@ import { useAuth } from '@/lib/auth-context';
 
 export default function LoginButton() {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [resetPopover, setResetPopover] = useState(false);
   const { user, setUser } = useAuth();
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
+    setResetPopover(false);
   };
 
   const handleClose = () => {
     setAnchorEl(null);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     console.log('LoginButton - Logging out');
-    setUser(null);
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to logout');
+      }
+      
+      setUser(null);
+      setResetPopover(true);
+      setAnchorEl(null);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const getInitials = (email: string) => {
@@ -99,6 +115,7 @@ export default function LoginButton() {
         open={Boolean(anchorEl)}
         anchorEl={anchorEl}
         onClose={handleClose}
+        reset={resetPopover}
       />
     </Box>
   );

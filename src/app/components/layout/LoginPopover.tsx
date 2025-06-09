@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Popover } from '@mui/material';
 import { Button, Typography } from '@mui/joy';
 import { useAuth } from '@/lib/auth-context';
@@ -10,17 +10,28 @@ interface LoginPopoverProps {
   open: boolean;
   anchorEl: HTMLElement | null;
   onClose: () => void;
+  reset?: boolean;
 }
 
 type AuthState = 'initial' | 'login' | 'register';
 
-export default function LoginPopover({ open, anchorEl, onClose }: LoginPopoverProps) {
+export default function LoginPopover({ open, anchorEl, onClose, reset }: LoginPopoverProps) {
   const { setUser } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [authState, setAuthState] = useState<AuthState>('initial');
+
+  // Reset state when reset prop changes
+  useEffect(() => {
+    if (reset) {
+      setAuthState('initial');
+      setEmail('');
+      setPassword('');
+      setError('');
+    }
+  }, [reset]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
