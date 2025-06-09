@@ -1,0 +1,157 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  adminConfig AdminConfig? // Required relationship
+  aboutMe   AboutMe?
+  personalInfo PersonalInfo?
+  address   Address?
+  pharmacy  Pharmacy?
+  insuranceInfo InsuranceInfo?
+
+  @@map("users")
+}
+
+model AdminConfig {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id])
+  
+  // Step titles
+  stepTwoTitle  String
+  stepThreeTitle String
+  
+  // Form fragment arrays
+  stepTwoFragments    FormFragment[]
+  stepThreeFragments  FormFragment[]
+  unusedFragments     FormFragment[]
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admin_configs")
+}
+
+model AboutMe {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id])
+  
+  // Open-ended questions
+  healthGoals   String?  // What are your main health goals?
+  lifestyle     String?  // Tell us about your daily lifestyle and routines
+  healthHistory String?  // Share your health journey and any significant events
+  preferences   String?  // Any specific preferences or requirements for your healthcare?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("about_me")
+}
+
+model PersonalInfo {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id])
+  
+  // Basic Information
+  firstName     String
+  lastName      String
+  dateOfBirth   DateTime
+  gender        Gender
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("personal_info")
+}
+
+model Address {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id])
+  
+  // Address Information
+  address       String
+  city          String
+  state         String
+  zipCode       String
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("addresses")
+}
+
+model Pharmacy {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id])
+  
+  pharmacyName  String
+  address       String
+  city          String
+  state         String
+  zipCode       String
+  phoneNumber   String
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("pharmacies")
+}
+
+model InsuranceInfo {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id])
+  
+  provider      String
+  policyNumber  String
+  groupNumber   String?
+  startDate     DateTime
+  endDate       DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("insurance_info")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum FormFragment {
+  ABOUT_ME
+  PERSONAL_INFO
+  ADDRESS
+  PHARMACY
+  INSURANCE_INFO
+}
